@@ -1,0 +1,22 @@
+{
+  "name": "melomaniac",
+  "version": "1.0.0",
+  "description": "A Music Marketplace on Blockchain",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"No tests\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DaleSid/MeloManiac.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DaleSid/MeloManiac/issues"
+  },
+  "homepage": "https://github.com/DaleSid/MeloManiac#readme"
+}

@@ -18,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/DaleSid/MeloManiac/issues"
   },
-  "homepage": "https://github.com/DaleSid/MeloManiac#readme"
+  "homepage": "https://github.com/DaleSid/MeloManiac#readme",
+  "dependencies": {
+    "express": "^4.17.3"
+  }
 }

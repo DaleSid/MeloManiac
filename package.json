@@ -2,12 +2,12 @@
   "name": "melomaniac",
   "version": "1.0.0",
   "description": "A Music Marketplace on Blockchain",
-  "main": "truffle-config.js",
+  "main": "index.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"No tests\""
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",

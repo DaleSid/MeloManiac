@@ -20,6 +20,8 @@
   },
   "homepage": "https://github.com/DaleSid/MeloManiac#readme",
   "dependencies": {
-    "express": "^4.17.3"
+    "express": "^4.17.3",
+    "truffle": "^5.5.10",
+    "truffle-contract": "^4.0.31"
   }
 }

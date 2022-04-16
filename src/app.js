@@ -6,10 +6,10 @@ App = {
     url: 'http://localhost:7545',
 
     load: async () => {
-        console.log("Dale Started")
         await App.loadWeb3()
         await App.loadContract()
         await App.render()
+        await App.bindEvents()
     },
 
     loadWeb3: async () => {
@@ -25,6 +25,55 @@ App = {
         web3 = new Web3(App.web3Provider);
 
         ethereum.enable();
+    },
+
+    loadContract: async () => {
+        // Create a JavaScript version of the smart contract
+        const meloArtifact = await $.getJSON('MeloManiac.json')
+        App.contracts.musicbook = TruffleContract(meloArtifact, App.address)
+        App.contracts.musicbook.setProvider(App.web3Provider)
+    
+        // Hydrate the smart contract with values from the blockchain
+        App.musicbook = await App.contracts.musicbook.deployed()
+    },
+
+    bindEvents: async () => {
+        $(document).on('click', '#register_new_user', await App.registerUser);
+    },
+
+    render: async () => {
+        // Prevent double render
+        if (App.loading) {
+          return
+        }
+    
+        // Update app loading state
+        App.setLoading(true)
+    
+        App.account = await App.loadAccount()
+        App.network = await App.loadNetwork()
+        App.balance = await App.loadBalance()
+        await App.populateDetails()
+        App.role = await App.getRole()
+        await App.showAndHideContent()
+        // Render Account
+        console.log(App.account)
+        console.log(App.network)
+        $('#account').html(App.account)
+        $('#network').html(App.network)
+        $('#account_balance').html(App.balance + " ETH")
+
+        $('#contract_address').html(App.contractAddress)
+        $('#no_of_users').html(App.userCount)
+        $('#no_of_artists').html(App.artistCount)
+        $('#no_of_songs').html(App.songCount)
+        jQuery('#something').text(App.account + ":" + App.network)
+    
+        // Render Tasks
+        // await App.renderTasks()
+    
+        // Update loading state
+        App.setLoading(false)
     },
 
     loadAccount: async () => {
@@ -45,26 +94,12 @@ App = {
         return network;
     },
 
-    loadContract: async () => {
-        // Create a JavaScript version of the smart contract
-        const meloArtifact = await $.getJSON('MeloManiac.json')
-        App.contracts.musicbook = TruffleContract(meloArtifact, App.address)
-        App.contracts.musicbook.setProvider(App.web3Provider)
-    
-        // Hydrate the smart contract with values from the blockchain
-        App.musicbook = await App.contracts.musicbook.deployed()
-    },
-
     populateDetails: async () => {
         var details = await App.getMeloDetails()
         App.contractAddress = details[0]
         App.userCount = details[1].toNumber()
         App.artistCount = details[2].toNumber()
         App.songCount = details[3].toNumber()
-        console.log(App.contractAddress)
-        console.log(App.userCount)
-        console.log(App.artistCount)
-        console.log(App.songCount)
     },
 
     getMeloDetails: async () => {
@@ -82,38 +117,9 @@ App = {
         return role;
     },
 
-    render: async () => {
-        // Prevent double render
-        if (App.loading) {
-          return
-        }
-    
-        // Update app loading state
-        App.setLoading(true)
-    
-        App.account = await App.loadAccount()
-        App.network = await App.loadNetwork()
-        App.balance = await App.loadBalance()
-        await App.populateDetails()
-        App.role = await App.getRole()
-        // Render Account
-        console.log(App.account)
-        console.log(App.network)
-        $('#account').html(App.account)
-        $('#network').html(App.network)
-        $('#account_balance').html(App.balance + " ETH")
-
-        $('#contract_address').html(App.contractAddress)
-        $('#no_of_users').html(App.userCount)
-        $('#no_of_artists').html(App.artistCount)
-        $('#no_of_songs').html(App.songCount)
-        jQuery('#something').text(App.account + ":" + App.network)
-    
-        // Render Tasks
-        // await App.renderTasks()
-    
-        // Update loading state
-        App.setLoading(false)
+    registerUser: async () => {
+        await App.musicbook.userRegister({from: App.account});
+        await App.render();
     },
     
     setLoading: (boolean) => {
@@ -126,6 +132,22 @@ App = {
         } else {
           loader.hide()
           content.show()
+        }
+    },
+
+    showAndHideContent: () => {
+        console.log("Role: " + App.role)
+        const user_register = $('#user_register')
+        const user_access = $('#user_access')
+        if (App.role == 2) {
+            user_access.show()
+            user_register.hide()
+        } else if (App.role == 1) {
+            user_access.show()
+            user_register.hide()
+        } else {
+            user_register.show()
+            user_access.hide()
         }
     },
 

@@ -125,8 +125,8 @@ contract MeloManiac {
         artistIDToArtist[song.artistID].artistAddress.transfer(msg.value);
     }
      
-    function userDetail() external view returns(uint, uint[] memory) {
-        return (addressToUser[msg.sender].userID, addressToUser[msg.sender].ownedSongs);
+    function userDetail() external view returns(uint, uint, uint[] memory) {
+        return (addressToUser[msg.sender].userID, addressToArtistID[msg.sender], addressToUser[msg.sender].ownedSongs);
     }
      
     function artistDetail(uint _artistID) external view returns(string memory, uint[] memory) {

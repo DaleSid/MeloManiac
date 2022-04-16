@@ -39,6 +39,7 @@ App = {
 
     bindEvents: async () => {
         $(document).on('click', '#register_new_user', App.registerUser);
+        $(document).on('click', '#register_new_artist', function(){ var nickName = $('#nickname_artist').val(); App.registerArtist(nickName); });
     },
 
     render: async () => {
@@ -68,6 +69,24 @@ App = {
         $('#no_of_artists').html(App.artistCount)
         $('#no_of_songs').html(App.songCount)
         jQuery('#something').text(App.account + ":" + App.network)
+
+        userDetails = await App.getUserDetail();
+        App.userID = userDetails[0].toNumber();
+        App.artistID = userDetails[1].toNumber();
+        App.userOwned = userDetails[2];
+
+        $('#user_address').html(App.account);
+        $('#user_id').html(App.userID);
+        $('#songs_owned').html(App.userOwned.length);
+
+        artistDetails = await App.getArtistDetail(App.artistID);
+        App.artistName = artistDetails[0].toString();
+        App.artistUploaded = artistDetails[1];
+        $('#artist_address').html(App.account);
+        $('#artist_id').html(App.artistID);
+        $('#artist_name').html(App.artistName);
+        $('#songs_uploaded').html(App.artistUploaded.length);
+
     
         // Render Tasks
         // await App.renderTasks()
@@ -120,6 +139,24 @@ App = {
     registerUser: async () => {
         await App.musicbook.userRegister({from: App.account});
         await App.render();
+    },
+
+    getUserDetail: async () => {
+        var values;
+        values = await App.musicbook.userDetail({from: App.account});
+        return values;
+    },
+
+    registerArtist: async (nickName) => {
+        console.log(nickName);
+        await App.musicbook.artistRegister(nickName, {from: App.account, value: web3.utils.toWei('0.05', 'ether')});
+        await App.render();
+    },
+
+    getArtistDetail: async (artist_id) => {
+        var values;
+        values = await App.musicbook.artistDetail(artist_id, {from: App.account});
+        return values;
     },
     
     setLoading: (boolean) => {

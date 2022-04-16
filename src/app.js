@@ -38,7 +38,7 @@ App = {
     },
 
     bindEvents: async () => {
-        $(document).on('click', '#register_new_user', await App.registerUser);
+        $(document).on('click', '#register_new_user', App.registerUser);
     },
 
     render: async () => {
@@ -113,7 +113,7 @@ App = {
 
     getRole: async () => {
         var role;
-        role = await App.musicbook.getRole();
+        role = await App.musicbook.getRole({from: App.account});
         return role;
     },
 
@@ -146,7 +146,7 @@ App = {
         const artist_song_privilege = $('#artist_song_privilege')
         const register_song_privilege = $('#register_song_privilege')
 
-        if (App.role == 2 && App.loading) {
+        if (App.role == 1 && App.loading) {
             user_access.show()
             user_register.hide()
             artist_access.show()
@@ -155,7 +155,7 @@ App = {
             user_song_privilege.show()
             artist_song_privilege.show()
             register_song_privilege.hide()
-        } else if (App.role == 1 && App.loading) {
+        } else if (App.role == 2 && App.loading) {
             user_access.show()
             user_register.hide()
             artist_register.show()

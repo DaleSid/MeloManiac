@@ -139,15 +139,23 @@ App = {
         console.log("Role: " + App.role)
         const user_register = $('#user_register')
         const user_access = $('#user_access')
+        const artist_register = $('#artist_register')
+        const artist_access = $('#artist_access')
         if (App.role == 2) {
             user_access.show()
             user_register.hide()
+            artist_access.show()
+            artist_register.hide()
         } else if (App.role == 1) {
             user_access.show()
             user_register.hide()
+            artist_register.show()
+            artist_access.hide()
         } else {
             user_register.show()
             user_access.hide()
+            artist_register.show()
+            artist_access.hide()
         }
     },
 

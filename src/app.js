@@ -141,21 +141,38 @@ App = {
         const user_access = $('#user_access')
         const artist_register = $('#artist_register')
         const artist_access = $('#artist_access')
+
+        const user_song_privilege = $('#user_song_privilege')
+        const artist_song_privilege = $('#artist_song_privilege')
+        const register_song_privilege = $('#register_song_privilege')
+
         if (App.role == 2) {
             user_access.show()
             user_register.hide()
             artist_access.show()
             artist_register.hide()
+
+            user_song_privilege.show()
+            artist_song_privilege.show()
+            register_song_privilege.hide()
         } else if (App.role == 1) {
             user_access.show()
             user_register.hide()
             artist_register.show()
             artist_access.hide()
+
+            user_song_privilege.show()
+            artist_song_privilege.hide()
+            register_song_privilege.hide()
         } else {
             user_register.show()
             user_access.hide()
             artist_register.show()
             artist_access.hide()
+
+            user_song_privilege.hide()
+            artist_song_privilege.hide()
+            register_song_privilege.show()
         }
     },
 

@@ -146,7 +146,7 @@ App = {
         const artist_song_privilege = $('#artist_song_privilege')
         const register_song_privilege = $('#register_song_privilege')
 
-        if (App.role == 2) {
+        if (App.role == 2 && App.loading) {
             user_access.show()
             user_register.hide()
             artist_access.show()
@@ -155,7 +155,7 @@ App = {
             user_song_privilege.show()
             artist_song_privilege.show()
             register_song_privilege.hide()
-        } else if (App.role == 1) {
+        } else if (App.role == 1 && App.loading) {
             user_access.show()
             user_register.hide()
             artist_register.show()
@@ -164,7 +164,7 @@ App = {
             user_song_privilege.show()
             artist_song_privilege.hide()
             register_song_privilege.hide()
-        } else {
+        } else if (App.role == 0 && App.loading) {
             user_register.show()
             user_access.hide()
             artist_register.show()
@@ -173,6 +173,15 @@ App = {
             user_song_privilege.hide()
             artist_song_privilege.hide()
             register_song_privilege.show()
+        } else {
+            user_register.hide()
+            user_access.hide()
+            artist_register.hide()
+            artist_access.hide()
+
+            user_song_privilege.hide()
+            artist_song_privilege.hide()
+            register_song_privilege.hide()
         }
     },
 

@@ -40,6 +40,7 @@ App = {
     bindEvents: async () => {
         $(document).on('click', '#register_new_user', App.registerUser);
         $(document).on('click', '#register_new_artist', function(){ var nickName = $('#nickname_artist').val(); App.registerArtist(nickName); });
+        $(document).on('click', '#upload_song', function(){ var song = $('#song_file').val(); var notes_cost = parseFloat($('#notes_cost').val()); App.uploadSong(song, notes_cost); });
     },
 
     render: async () => {
@@ -157,6 +158,21 @@ App = {
         var values;
         values = await App.musicbook.artistDetail(artist_id, {from: App.account});
         return values;
+    },
+
+    uploadSong: async (song, notes_cost) => {
+        const notes = parseFloat(notes_cost);
+        // const songHash = await App.getSongHash(song);
+        const songPath = song.split("\\");
+        const titleWithExtension = songPath[songPath.length - 1].split(".");
+        const title = titleWithExtension[0];
+        console.log(title);
+        console.log(notes);
+        // await App.musicbook.artistUploadSong(notes, title, songHash, {from: App.account});
+    },
+
+    getSongHash: async (songFile) => {
+        return;
     },
     
     setLoading: (boolean) => {

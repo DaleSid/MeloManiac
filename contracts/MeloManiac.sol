@@ -29,6 +29,7 @@ contract MeloManiac {
         string title;
         uint releaseDate;
         uint notes;
+        string songHash;
     }
  
     enum ROLE {UNREGISTERED, ARTIST, USER}
@@ -106,7 +107,7 @@ contract MeloManiac {
         Artist storage artistInstance = artistIDToArtist[addressToArtistID[msg.sender]];
         artistInstance.uploadedSongs.push(songsCount);
     
-        songIDtoSong[songsCount] = Song(artistInstance.artistID, songsCount, _title, _notes, now);
+        songIDtoSong[songsCount] = Song(artistInstance.artistID, songsCount, _title, now, _notes, songHash);
         hashToSong[songHash] = songIDtoSong[songsCount];
     }
      
@@ -132,13 +133,14 @@ contract MeloManiac {
         return (artistIDToArtist[_artistID].nickName, artistIDToArtist[_artistID].uploadedSongs);
     }
      
-    function songDetail(uint songID) external view returns(uint artistID, uint id, string memory title, uint notes, uint releaseDate) {
+    function songDetail(uint songID) external view returns(uint artistID, uint id, string memory title, uint notes, uint releaseDate, string memory songHash) {
         Song memory song = songIDtoSong[songID];        
         id = song.songID;
         artistID = song.artistID;
         title = song.title;
         notes = song.notes;
         releaseDate = song.releaseDate;
+        songHash = song.songHash;
     }
     
     function donate(uint artistID) public payable {

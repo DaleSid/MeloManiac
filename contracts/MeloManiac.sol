@@ -100,7 +100,6 @@ contract MeloManiac {
         artistIDToArtist[artistsCount] = newArtist;
     }
      
-     
     function artistUploadSong(uint _notes, string calldata _title, string calldata songHash) external onlyArtist onlyUniqueSong(songHash) {
         songsCount += 1;
         
@@ -131,11 +130,6 @@ contract MeloManiac {
      
     function artistDetail(uint _artistID) external view returns(string memory, uint[] memory) {
         return (artistIDToArtist[_artistID].nickName, artistIDToArtist[_artistID].uploadedSongs);
-    }
-
-    function getSongRdsDetails(address _address) external view returns(uint, uint, uint) {
-        uint sReleaseDate = songIDtoSong[songsCount].releaseDate;
-        return (addressToArtistID[_address], songsCount, sReleaseDate);
     }
      
     function songDetail(uint songID) external view returns(uint artistID, uint id, string memory title, uint notes, uint releaseDate) {

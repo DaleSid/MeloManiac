@@ -40,7 +40,8 @@ App = {
     bindEvents: async () => {
         $(document).on('click', '#register_new_user', App.registerUser);
         $(document).on('click', '#register_new_artist', function(){ var nickName = $('#nickname_artist').val(); App.registerArtist(nickName); });
-        $(document).on('click', '#upload_song', function(){ var song = $('#song_file').val(); var notes_cost = parseFloat($('#notes_cost').val()); App.uploadSong(song, notes_cost); });
+        $(document).on('click', '#upload_song', function(){ var song = $('#song_file').val(); var notes_cost = $('#notes_cost').val(); App.uploadSong(song, notes_cost); });
+        $(document).on('click', '.purchase', function(){ var songID = this.id; App.purchaseSong(songID); });
     },
 
     render: async () => {
@@ -75,7 +76,7 @@ App = {
         App.userID = userDetails[0].toNumber();
         App.artistID = userDetails[1].toNumber();
         App.userOwned = userDetails[2];
-
+        
         $('#user_address').html(App.account);
         $('#user_id').html(App.userID);
         $('#songs_owned').html(App.userOwned.length);
@@ -83,11 +84,20 @@ App = {
         artistDetails = await App.getArtistDetail(App.artistID);
         App.artistName = artistDetails[0].toString();
         App.artistUploaded = artistDetails[1];
+
         $('#artist_address').html(App.account);
         $('#artist_id').html(App.artistID);
         $('#artist_name').html(App.artistName);
         $('#songs_uploaded').html(App.artistUploaded.length);
 
+        var artistListings = await App.constructArtistListings(App.artistUploaded);
+        $('#artist_listings').html(artistListings);
+
+        var userListings = await App.constructUserListings(App.userOwned);
+        $('#user_listings').html(userListings);
+
+        var userListings = await App.constructBuyerListings(App.songCount);
+        $('#buyer_listings').html(userListings);
     
         // Render Tasks
         // await App.renderTasks()
@@ -161,7 +171,7 @@ App = {
     },
 
     uploadSong: async (song, notes_cost) => {
-        const notes = parseFloat(notes_cost);
+        const notes = web3.utils.toWei(notes_cost, "ether");
         // const songHash = await App.getSongHash(song);
         const songPath = song.split("\\");
         const titleWithExtension = songPath[songPath.length - 1].split(".");
@@ -169,6 +179,89 @@ App = {
         console.log(title);
         console.log(notes);
         // await App.musicbook.artistUploadSong(notes, title, songHash, {from: App.account});
+        await App.render();
+    },
+
+    constructArtistListings: async (songList) => {
+        var arrayLength = songList.length;
+        var finalHTMLString = "";
+        for (var i = 0; i < arrayLength; i++) {
+            var values = await App.getSongDetail(songList[i].toNumber());
+            var audioHTMLString = "<audio controls preload=\"metadata\" style=\" width:500px;\"><source src=\"https://gateway.ipfs.io/ipfs/" + values[5] +"\" type=\"audio/mpeg\">Your browser does not support the audio element.</audio>";
+            var tempHTMLString =    "<tr><td>" + values[1] + "</td>" +
+                                    "<td>" + values[2] + "</td>" +
+                                    "<td>" + audioHTMLString + "</td>" +
+                                    "<td>" + values[4] + "</td></tr>";
+            finalHTMLString = finalHTMLString + tempHTMLString;
+        }
+        return finalHTMLString;
+    },
+
+    constructUserListings: async (songList) => {
+        var arrayLength = songList.length;
+        var finalHTMLString = "";
+        for (var i = 0; i < arrayLength; i++) {
+            var values = await App.getSongDetail(songList[i]);
+            var audioHTMLString = "<audio controls preload=\"metadata\" style=\" width:500px;\"><source src=\"https://gateway.ipfs.io/ipfs/" + values[5] +"\" type=\"audio/mpeg\">Your browser does not support the audio element.</audio>";
+
+            var artistDetails = await App.getArtistDetail(values[1].toNumber());
+            var artistName = artistDetails[0].toString();
+            
+            var tempHTMLString =    "<tr><td>" + values[1] + "</td>" +
+                                    "<td>" + values[2] + "</td>" +
+                                    "<td>" + artistName + "</td>" +
+                                    "<td>" + audioHTMLString + "</td>" +
+                                    "<td>" + values[4] + "</td></tr>";
+            finalHTMLString = finalHTMLString + tempHTMLString;
+        }
+        return finalHTMLString;
+    },
+
+    constructBuyerListings: async (songListLen) => {
+        var arrayLength = songListLen;
+        var finalHTMLString = "";
+        for (var i = 1; i <= arrayLength; i++) {
+            var values = await App.getSongDetail(i);
+            
+            var audioHTMLString = "<audio controls preload=\"metadata\" style=\" width:500px;\" ontimeupdate=\"restrict(this)\"><source src=\"https://gateway.ipfs.io/ipfs/" + values[5] +"\" type=\"audio/mpeg\">Your browser does not support the audio element.</audio> \
+            <script> \
+            function restrict(event) { \
+              if (event.currentTime > 10) { \
+                event.pause(); \
+                event.currentTime = 0; \
+              } \
+            } \
+            </script>";
+
+            var artistDetails = await App.getArtistDetail(values[1].toNumber());
+            var artistName = artistDetails[0].toString();
+
+            var buttonString = "<button type=\"button\" class=\"btn btn-primary purchase\" id=\"" + values[1] + "\">" + web3.utils.fromWei(values[3], "ether") + " ETH</button>";
+
+            var tempHTMLString =    "<tr><td>" + values[1].toNumber() + "</td>" +
+                                    "<td>" + values[2] + "</td>" +
+                                    "<td>" + artistName + "</td>" +
+                                    "<td>" + audioHTMLString + "</td>" +
+                                    "<td>" + values[4] + "</td>" + 
+                                    "<td>" + buttonString + "</td></tr>";
+
+            finalHTMLString = finalHTMLString + tempHTMLString;
+        }
+        return finalHTMLString;
+    },
+
+    purchaseSong: async (songID) => {
+        const songDetails = await App.getSongDetail(songID);
+        const notes = songDetails[3];
+        console.log("Purchase Notes: " + notes);
+        await App.musicbook.userBuySong(songID, {from: App.account, value: notes});
+        await App.render();
+    },
+
+    getSongDetail: async (songID) => {
+        var values;
+        values = await App.musicbook.songDetail(songID, {from: App.account});
+        return values;
     },
 
     getSongHash: async (songFile) => {

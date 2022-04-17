@@ -2,12 +2,25 @@ App = {
     web3Provider: null,
     loading: false,
     contracts: {},
-    address: '0x564E462Ce2bCF0804146EA8a9Ea63DC7A473bfDB',
+    address: '0x565A08FbDFdfAD165098a2d34c3981CD219B4f0d',
     url: 'http://localhost:7545',
+    buffer: '',
+    blockNumber:'',
+    transactionHash:'',
+    gasUsed:'',
+    txReceipt: '',
+    ethAddress: '',
 
     load: async () => {
         await App.loadWeb3()
         await App.loadContract()
+        App.ipfs = window.IpfsApi("ipfs.infura.io", '5001')
+        console.log(App.ipfs)
+        // var moduleName = 'ipfs-api';
+        // define([moduleName], function(fooModule){
+        //     const IPFS = require(fooModule)
+        //     App.ipfs = new IPFS({ host: "ipfs.infura.io", port: 5001, protocol: "https" });
+        // })
         await App.render()
         await App.bindEvents()
     },
@@ -40,7 +53,27 @@ App = {
     bindEvents: async () => {
         $(document).on('click', '#register_new_user', App.registerUser);
         $(document).on('click', '#register_new_artist', function(){ var nickName = $('#nickname_artist').val(); App.registerArtist(nickName); });
-        $(document).on('click', '#upload_song', function(){ var song = $('#song_file').val(); var notes_cost = parseFloat($('#notes_cost').val()); App.uploadSong(song, notes_cost); });
+        $(document).on('click', '#upload_song', function(){ 
+            console.log('Inside onclick')
+            const song = document.getElementById('song_file')
+            // reader.readAsArrayBuffer(song.files[0])
+            var songFilePath = $('#song_file').val()
+            var notes_cost = parseFloat($('#notes_cost').val()); 
+            // console.log('Here')
+            // console.log(App.buffer)
+            App.uploadSong(song, songFilePath, notes_cost); 
+        });
+        // $("#song_file").on("change", function() {
+        //     var reader = new FileReader();
+        //     reader.onload = function (e) {
+        //         const converted_to_buffer = buffer.Buffer(reader.result); // honestly as a web developer I do not fully appreciate the difference between buffer and arrayBuffer 
+        //         App.buffer = converted_to_buffer
+        //         console.log('Here')
+        //         console.log(converted_to_buffer)
+        //     }
+        //     // reader.readAsArrayBuffer(this.files[0]);
+        // })
+
     },
 
     render: async () => {
@@ -160,19 +193,86 @@ App = {
         return values;
     },
 
-    uploadSong: async (song, notes_cost) => {
+    uploadSong: async (song, songFilePath, notes_cost) => {
         const notes = parseFloat(notes_cost);
-        // const songHash = await App.getSongHash(song);
-        const songPath = song.split("\\");
+        var songHash = await App.getSongHash(song);
+
+        console.log('SongHash created')
+        console.log(typeof songHash)
+        console.log(songHash)
+        console.log(App.ipfsHash)
+        const songPath = songFilePath.split("\\");
         const titleWithExtension = songPath[songPath.length - 1].split(".");
         const title = titleWithExtension[0];
         console.log(title);
         console.log(notes);
-        // await App.musicbook.artistUploadSong(notes, title, songHash, {from: App.account});
+        await App.musicbook.artistUploadSong(notes, title, songHash, {from: App.account});
     },
-
+    // uploadSongClicked: async (event) => {
+    //     console.log('inside onSubmit')
+    //     const accounts = await web3.eth.getAccounts();
+    //     const ethAddress= await App.musicbook.options.address;
+    //     App.ethAddress = ethAddress;
+    //     await ipfs.add(App.buffer, (err, ipfsHash) => {
+    //         console.log(err,ipfsHash);
+    //         App.ipfsHash = ipfsHash[0].hash
+    //     });
+    //     console.log(ipfsHash)
+    // },
     getSongHash: async (songFile) => {
-        return;
+        // console.log(JSON.stringify(songFile))
+        var resultHash = ''
+        const reader = new FileReader();
+        reader.onloadend = function() {
+            var buffer = require('buffer');
+            console.log('Require crossed')
+            const buf = buffer.Buffer.from(reader.result) // Convert data into buffer
+            App.ipfs.files.add(buf, (err, result) => { // Upload buffer to IPFS
+            if(err) {
+                console.error(err)
+                return
+            }
+            App.ipfsHash = result[0].hash
+            console.log(typeof result[0].hash)
+            console.log(`Hash is --> ${App.ipfsHash}`)
+            let url = `https://gateway.ipfs.io/ipfs/${result[0].hash}`
+            console.log(`Url --> ${url}`)
+            resultHash = String(result[0].hash)
+            })
+        }
+        reader.readAsArrayBuffer(songFile.files[0]);
+        return resultHash
+        // var buffer = require('buffer');
+        // console.log('Require crossed')
+        // const buf = await buffer.Buffer.from(songFile);
+        // App.buffer = buf
+        // console.log('Buffer is')
+        // console.log(buf)
+        // await App.ipfs.files.add(App.buffer, (err, ipfsHash) => {
+        //     if(err){
+        //         console.log('Error in ipfs add')
+        //         console.log(err)
+        //       }
+        //     console.log(err,ipfsHash)
+        //     App.ipfsHash = ipfsHash[0].hash
+        // });
+        // onClick = async () => {
+        //     try{
+        //         console.log('Inside SongHash')
+        //         App.blockNumber = 'Waiting...'
+        //         App.gasUsed = 'Waiting...'
+        //         await web3.eth.getTransactionReceipt(App.transactionHash, (err, txReceipt) => {
+        //             console.log(err,txReceipt);
+        //             App.txReceipt = txReceipt;
+        //         });
+        //         App.blockNumber = txReceipt.blockNumber
+        //         App.gasUsed = txReceipt.gasUsed
+        //         console.log('SongHash Worked')
+        //     }
+        //     catch(error){
+        //         console.log(error);
+        //     } //catch
+        // }
     },
     
     setLoading: (boolean) => {

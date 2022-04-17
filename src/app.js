@@ -224,11 +224,13 @@ App = {
         var finalHTMLString = "";
         for (var i = 0; i < arrayLength; i++) {
             var values = await App.getSongDetail(songList[i].toNumber());
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            var releaseDate = new Date(values[4]*1000).toLocaleDateString("en-US", options)
             var audioHTMLString = "<audio controls preload=\"metadata\" style=\" width:500px;\"><source src=\"https://gateway.ipfs.io/ipfs/" + values[5] +"\" type=\"audio/mpeg\">Your browser does not support the audio element.</audio>";
             var tempHTMLString =    "<tr><td>" + values[1] + "</td>" +
                                     "<td>" + values[2] + "</td>" +
                                     "<td>" + audioHTMLString + "</td>" +
-                                    "<td>" + values[4] + "</td></tr>";
+                                    "<td>" + releaseDate + "</td></tr>";
             finalHTMLString = finalHTMLString + tempHTMLString;
         }
         return finalHTMLString;
@@ -242,25 +244,31 @@ App = {
             var values = await App.getSongDetail(songList[i]);
             var audioHTMLString = "<audio controls preload=\"metadata\" style=\" width:500px;\"><source src=\"https://gateway.ipfs.io/ipfs/" + values[5] +"\" type=\"audio/mpeg\">Your browser does not support the audio element.</audio>";
 
-            var artistDetails = await App.getArtistDetail(values[1].toNumber());
+            var artistDetails = await App.getArtistDetail(values[0].toNumber());
             var artistName = artistDetails[0].toString();
             
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            var releaseDate = new Date(values[4]*1000).toLocaleDateString("en-US", options)
+
             var tempHTMLString =    "<tr><td>" + values[1] + "</td>" +
                                     "<td>" + values[2] + "</td>" +
                                     "<td>" + artistName + "</td>" +
                                     "<td>" + audioHTMLString + "</td>" +
-                                    "<td>" + values[4] + "</td></tr>";
+                                    "<td>" + releaseDate + "</td></tr>";
             finalHTMLString = finalHTMLString + tempHTMLString;
         }
         return finalHTMLString;
     },
 
     constructBuyerListings: async (songListLen) => {
+        console.log("Inside buyer listing")
         var arrayLength = songListLen;
         var finalHTMLString = "";
         for (var i = 1; i <= arrayLength; i++) {
             var values = await App.getSongDetail(i);
-            
+            console.log('INSIDE LOOP' + i)
+            console.log('Song Details:')
+            console.log(values)
             var audioHTMLString = "<audio controls preload=\"metadata\" style=\" width:500px;\" ontimeupdate=\"restrict(this)\"><source src=\"https://gateway.ipfs.io/ipfs/" + values[5] +"\" type=\"audio/mpeg\">Your browser does not support the audio element.</audio> \
             <script> \
             function restrict(event) { \
@@ -270,9 +278,15 @@ App = {
               } \
             } \
             </script>";
-
-            var artistDetails = await App.getArtistDetail(values[1].toNumber());
+            console.log('artist id is' + values[0].toNumber())
+            var artistDetails = await App.getArtistDetail(values[0].toNumber());
+            console.log('Artist Details:')
+            console.log(artistDetails)
             var artistName = artistDetails[0].toString();
+            console.log(artistName)
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            var releaseDate = new Date(values[4]*1000).toLocaleDateString("en-US", options)
+            console.log('release Data is ' + releaseDate)
 
             var buttonString = "<button type=\"button\" class=\"btn btn-primary purchase\" id=\"" + values[1] + "\">" + web3.utils.fromWei(values[3], "ether") + " ETH</button>";
 
@@ -280,7 +294,7 @@ App = {
                                     "<td>" + values[2] + "</td>" +
                                     "<td>" + artistName + "</td>" +
                                     "<td>" + audioHTMLString + "</td>" +
-                                    "<td>" + values[4] + "</td>" + 
+                                    "<td>" + releaseDate + "</td>" + 
                                     "<td>" + buttonString + "</td></tr>";
 
             finalHTMLString = finalHTMLString + tempHTMLString;

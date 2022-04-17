@@ -143,7 +143,7 @@ contract MeloManiac {
         songHash = song.songHash;
     }
     
-    function donate(uint artistID) public payable {
-        artistIDToArtist[artistID].artistAddress.transfer(msg.value);
-    }
+    // function donate(uint artistID) public payable {
+    //     artistIDToArtist[artistID].artistAddress.transfer(msg.value);
+    // }
 }

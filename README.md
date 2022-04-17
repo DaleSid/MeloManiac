@@ -5,6 +5,7 @@ Melomaniacs is a blockchain powered independent music buying and selling marketp
 truffle migrate --reset
 ```
 ```bash
+npm install -g browserify
 browserify app.js -o bundle.js
 ```
 ```bash

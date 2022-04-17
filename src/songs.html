@@ -50,9 +50,6 @@
         <p class="text-center">Loading...</p>
       </div>
       <div id="content">
-        <div id="user_song_privilege">
-          <h1 id="something"></h1>
-        </div>
         <div id="artist_song_privilege">
           <div class="card text-center">
             <div class="card-header">
@@ -72,6 +69,23 @@
               Select a song and click "Upload"
             </div>
           </div>
+        </div>
+        <div id="user_song_privilege">
+          <table class="table table-dark table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Artist</th>
+                    <th scope="col">Song</th>
+                    <th scope="col">Release Date</th>
+                    <th scope="col">Buy</th>
+                </tr>
+            </thead>
+            <tbody id="buyer_listings">
+                  <!-- User songs filled here -->
+            </tbody>
+          </table>
         </div>
         <div id="register_song_privilege">
           <h1>Please register before using this section</h1>

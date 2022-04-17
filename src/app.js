@@ -2,12 +2,20 @@ App = {
     web3Provider: null,
     loading: false,
     contracts: {},
-    address: '0x564E462Ce2bCF0804146EA8a9Ea63DC7A473bfDB',
+    address: '0x4a2feb0236Fb7Df8214Cd76ed3328ABAec6Dea9A',
     url: 'http://localhost:7545',
+    buffer: '',
+    blockNumber:'',
+    transactionHash:'',
+    gasUsed:'',
+    txReceipt: '',
+    ethAddress: '',
 
     load: async () => {
         await App.loadWeb3()
         await App.loadContract()
+        App.ipfs = window.IpfsApi("ipfs.infura.io", '5001')
+        console.log(App.ipfs)
         await App.render()
         await App.bindEvents()
     },
@@ -40,7 +48,16 @@ App = {
     bindEvents: async () => {
         $(document).on('click', '#register_new_user', App.registerUser);
         $(document).on('click', '#register_new_artist', function(){ var nickName = $('#nickname_artist').val(); App.registerArtist(nickName); });
-        $(document).on('click', '#upload_song', function(){ var song = $('#song_file').val(); var notes_cost = $('#notes_cost').val(); App.uploadSong(song, notes_cost); });
+        $(document).on('click', '#upload_song', function(){ 
+            console.log('Inside onclick')
+            const song = document.getElementById('song_file')
+            // reader.readAsArrayBuffer(song.files[0])
+            var songFilePath = $('#song_file').val()
+            var notes_cost = $('#notes_cost').val(); 
+            // console.log('Here')
+            // console.log(App.buffer)
+            App.uploadSong(song, songFilePath, notes_cost); 
+        });
         $(document).on('click', '.purchase', function(){ var songID = this.id; App.purchaseSong(songID); });
     },
 
@@ -170,16 +187,36 @@ App = {
         return values;
     },
 
-    uploadSong: async (song, notes_cost) => {
+    uploadSong: async (song, songFilePath, notes_cost) => {
         const notes = web3.utils.toWei(notes_cost, "ether");
-        // const songHash = await App.getSongHash(song);
-        const songPath = song.split("\\");
+        var songHash = ''
+        const songPath = songFilePath.split("\\");
         const titleWithExtension = songPath[songPath.length - 1].split(".");
         const title = titleWithExtension[0];
+        
+        const reader = new FileReader();
+        reader.onloadend = function() {
+            var buffer = require('buffer');
+            console.log('Require crossed')
+            const buf = buffer.Buffer.from(reader.result) // Convert data into buffer
+            App.ipfs.files.add(buf, (err, result) => { // Upload buffer to IPFS
+                if(err) {
+                    console.error(err)
+                    return
+                }
+                console.log(typeof result[0].hash)
+                console.log("Hash: " + result[0].hash)
+                let url = `https://gateway.ipfs.io/ipfs/${result[0].hash}`
+                console.log(`Url --> ${url}`)
+                resultHash = String(result[0].hash)
+                console.log("Inside:" + notes)
+                App.musicbook.artistUploadSong(notes, title, resultHash, {from: App.account});
+            })
+        }
+        reader.readAsArrayBuffer(song.files[0]);
+
         console.log(title);
         console.log(notes);
-        // await App.musicbook.artistUploadSong(notes, title, songHash, {from: App.account});
-        await App.render();
     },
 
     constructArtistListings: async (songList) => {
@@ -198,6 +235,7 @@ App = {
     },
 
     constructUserListings: async (songList) => {
+        console.log('Inside User listing')
         var arrayLength = songList.length;
         var finalHTMLString = "";
         for (var i = 0; i < arrayLength; i++) {

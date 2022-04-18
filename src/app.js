@@ -87,7 +87,6 @@ App = {
         $('#no_of_users').html(App.userCount)
         $('#no_of_artists').html(App.artistCount)
         $('#no_of_songs').html(App.songCount)
-        jQuery('#something').text(App.account + ":" + App.network)
 
         userDetails = await App.getUserDetail();
         App.userID = userDetails[0].toNumber();
@@ -188,14 +187,14 @@ App = {
     },
 
     uploadSong: async (song, songFilePath, notes_cost) => {
-        const notes = web3.utils.toWei(notes_cost, "ether");
+        const notes = web3.utils.toWei(notes_cost, 'ether');
         var songHash = ''
         const songPath = songFilePath.split("\\");
         const titleWithExtension = songPath[songPath.length - 1].split(".");
         const title = titleWithExtension[0];
         
         const reader = new FileReader();
-        reader.onloadend = function() {
+        reader.onloadend = async () => {
             var buffer = require('buffer');
             console.log('Require crossed')
             const buf = buffer.Buffer.from(reader.result) // Convert data into buffer
@@ -210,7 +209,19 @@ App = {
                 console.log(`Url --> ${url}`)
                 resultHash = String(result[0].hash)
                 console.log("Inside:" + notes)
-                App.musicbook.artistUploadSong(notes, title, resultHash, {from: App.account});
+                
+                App.musicbook.artistUploadSong(notes, title, resultHash, {from: App.account}).then((e, result) => {
+                    $(".toast").toast("show");
+                    $(".toast-body").html("Upload Successful!");
+                }, (error) => {
+                    var msg = error.message.toString();
+                    var toStrip = "[ethjs-query] while formatting outputs from RPC ";
+                    var structured = msg.substr(toStrip.length);
+                    structured = structured.replace(/(^'|'$)/g, '')
+                    var msgJSON = JSON.parse(structured);
+                    $(".toast").toast("show");
+                    $(".toast-body").html(msgJSON.value.data.message);
+                });
             })
         }
         reader.readAsArrayBuffer(song.files[0]);
@@ -304,9 +315,20 @@ App = {
 
     purchaseSong: async (songID) => {
         const songDetails = await App.getSongDetail(songID);
-        const notes = songDetails[3];
+        const notes = web3.utils.fromWei(songDetails[3], "ether");
         console.log("Purchase Notes: " + notes);
-        await App.musicbook.userBuySong(songID, {from: App.account, value: notes});
+        await App.musicbook.userBuySong(songID, {from: App.account, value: web3.utils.toWei(notes, 'ether')}).then((e, result) => {
+            $(".toast").toast("show");
+            $(".toast-body").html("Purchase Successful!");
+        }, (error) => {
+            var msg = error.message.toString();
+            var toStrip = "[ethjs-query] while formatting outputs from RPC ";
+            var structured = msg.substr(toStrip.length);
+            structured = structured.replace(/(^'|'$)/g, '')
+            var msgJSON = JSON.parse(structured);
+            $(".toast").toast("show");
+            $(".toast-body").html(msgJSON.value.data.message);
+        });
         await App.render();
     },
 

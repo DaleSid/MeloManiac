@@ -15,7 +15,7 @@ App = {
     load: async () => {
         await App.loadWeb3()
         await App.loadContract()
-        App.ipfs = window.IpfsApi("ipfs.infura.io", '5001')
+        App.ipfs = window.IpfsApi("ipfs.infura.io", '5001', 'https')
         console.log(App.ipfs)
         await App.render()
         await App.bindEvents()

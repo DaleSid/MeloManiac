@@ -2,8 +2,8 @@ App = {
     web3Provider: null,
     loading: false,
     contracts: {},
-    address: '0x4a2feb0236Fb7Df8214Cd76ed3328ABAec6Dea9A',
-    url: 'http://localhost:7545',
+    address: '0x38Fe5CD2B7806781fb962DB6EbD3EE8F79Dd1443',
+    url: 'https://ropsten.infura.io/v3/62cff11104f54085984676c0008ebce0',
     buffer: '',
     blockNumber:'',
     transactionHash:'',
@@ -200,7 +200,7 @@ App = {
             const buf = buffer.Buffer.from(reader.result) // Convert data into buffer
             App.ipfs.files.add(buf, (err, result) => { // Upload buffer to IPFS
                 if(err) {
-                    console.error(err)
+                    console.error("IPFS Add error: " + err)
                     return
                 }
                 console.log(typeof result[0].hash)

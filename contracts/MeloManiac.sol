@@ -3,8 +3,11 @@ pragma solidity >=0.4.22 <0.9.0;
 
 // Deployed at <Enter address starting with 0x> on Ropsten Network
 
+import "./MeloNotes.sol";
+
 contract MeloManiac {
     address public contractOwner;
+    MeloNotes public tokenContract;
     uint public songsCount;
     uint public usersCount;
     uint public artistsCount;
@@ -65,8 +68,9 @@ contract MeloManiac {
         _;
     }
 
-    constructor() public {
+    constructor(MeloNotes _tokenContract) {
         contractOwner = msg.sender;
+        tokenContract = _tokenContract;
         songsCount = 0;
         usersCount = 0;
         artistsCount = 0;
@@ -82,23 +86,26 @@ contract MeloManiac {
      
     function userRegister() public onlyNewUser {
         usersCount += 1;
-        
-        User memory newUser = User(usersCount, new uint[](0));
-        addressToUser[msg.sender] = newUser;
+
+        addressToUser[msg.sender].userID = usersCount;
+        addressToUser[msg.sender].ownedSongs = new uint[](0);
+
+        tokenContract.transferFrom(contractOwner, msg.sender, 100);
     }
      
     function artistRegister(string calldata _nickName) external onlyNewArtist payable {
-        require(msg.value == 0.05 ether,"Artist registration fee");
+        // require(msg.value == 5 ** tokenContract.decimals(), "Artist registration fee");
         artistsCount += 1;
         
         if (addressToUser[msg.sender].userID == 0) {
             userRegister();
         }
         
-        Artist memory newArtist = Artist(artistsCount,addressToUser[msg.sender].userID, _nickName, msg.sender, new uint[](0));
-        
+        artistIDToArtist[artistsCount] = Artist(artistsCount,addressToUser[msg.sender].userID, _nickName, payable(msg.sender), new uint[](0));
+
         addressToArtistID[msg.sender] = artistsCount;
-        artistIDToArtist[artistsCount] = newArtist;
+
+        tokenContract.transferFrom(contractOwner, msg.sender, 5000);
     }
      
     function artistUploadSong(uint _notes, string calldata _title, string calldata songHash) external onlyArtist onlyUniqueSong(songHash) {
@@ -107,8 +114,10 @@ contract MeloManiac {
         Artist storage artistInstance = artistIDToArtist[addressToArtistID[msg.sender]];
         artistInstance.uploadedSongs.push(songsCount);
     
-        songIDtoSong[songsCount] = Song(artistInstance.artistID, songsCount, _title, now, _notes, songHash);
+        songIDtoSong[songsCount] = Song(artistInstance.artistID, songsCount, _title, block.timestamp, _notes, songHash);
         hashToSong[songHash] = songIDtoSong[songsCount];
+
+        tokenContract.transferFrom(contractOwner, msg.sender, 500);
     }
      
     function userBuySong(uint songID) external onlyUser payable {
@@ -122,7 +131,7 @@ contract MeloManiac {
         user.ownedSongs.push(songID);
         user.ownership[songID] = true;
     
-        artistIDToArtist[song.artistID].artistAddress.transfer(msg.value);
+        tokenContract.transferFrom(msg.sender, artistIDToArtist[song.artistID].artistAddress, msg.value);
     }
      
     function userDetail() external view returns(uint, uint, uint[] memory) {
@@ -142,8 +151,4 @@ contract MeloManiac {
         releaseDate = song.releaseDate;
         songHash = song.songHash;
     }
-    
-    // function donate(uint artistID) public payable {
-    //     artistIDToArtist[artistID].artistAddress.transfer(msg.value);
-    // }
 }

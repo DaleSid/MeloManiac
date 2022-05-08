@@ -3,7 +3,7 @@ App = {
     loading: false,
     contracts: {},
     marketPlaceAddress: '0xdF39dff52cA9341cEf8CBA90A55f8AE91Ae3dd98',
-    url: 'http://localhost:7545',
+    url: 'https://ropsten.infura.io/v3/62cff11104f54085984676c0008ebce0',
     tokenAddress: '0x7e7d3fF5fc9bAF4aA33e7305BA55f9Eb7088f293',
     buffer: '',
     blockNumber:'',
@@ -15,7 +15,7 @@ App = {
     load: async () => {
         await App.loadWeb3()
         await App.loadContract()
-        App.ipfs = window.IpfsApi("ipfs.infura.io", '5001')
+        App.ipfs = window.IpfsApi({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' })
         console.log(App.ipfs)
         await App.render()
         await App.bindEvents()

@@ -3,9 +3,9 @@ App = {
     web3Provider: null,
     loading: false,
     contracts: {},
-    marketPlaceAddress: '0xdF39dff52cA9341cEf8CBA90A55f8AE91Ae3dd98',
-    url: 'http://localhost:7545',
-    tokenAddress: '0x7e7d3fF5fc9bAF4aA33e7305BA55f9Eb7088f293',
+    marketPlaceAddress: '0x4ce219d395D93e3d20869DfD5c5125a2Fc9681C5',
+    url: 'https://ropsten.infura.io/v3/62cff11104f54085984676c0008ebce0',
+    tokenAddress: '0xDbeE936f22ae31B297B9302260B697cEC6d83D32',
     buffer: '',
     blockNumber:'',
     transactionHash:'',
@@ -16,7 +16,7 @@ App = {
     load: async () => {
         await App.loadWeb3()
         await App.loadContract()
-        App.ipfs = window.IpfsApi("ipfs.infura.io", '5001')
+        App.ipfs = window.IpfsApi({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' })
         console.log(App.ipfs)
         await App.render()
         await App.bindEvents()

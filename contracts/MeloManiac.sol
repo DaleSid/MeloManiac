@@ -90,7 +90,10 @@ contract MeloManiac {
         addressToUser[msg.sender].userID = usersCount;
         addressToUser[msg.sender].ownedSongs = new uint[](0);
 
-        tokenContract.transferFrom(contractOwner, msg.sender, 100);
+        if (msg.sender != contractOwner)
+        {
+            tokenContract.transferFrom(contractOwner, msg.sender, 100);
+        }
     }
      
     function artistRegister(string calldata _nickName) external onlyNewArtist payable {
@@ -105,7 +108,10 @@ contract MeloManiac {
 
         addressToArtistID[msg.sender] = artistsCount;
 
-        tokenContract.transferFrom(contractOwner, msg.sender, 5000);
+        if (msg.sender != contractOwner)
+        {
+            tokenContract.transferFrom(contractOwner, msg.sender, 5000);
+        }
     }
      
     function artistUploadSong(uint _notes, string calldata _title, string calldata songHash) external onlyArtist onlyUniqueSong(songHash) {
@@ -117,7 +123,10 @@ contract MeloManiac {
         songIDtoSong[songsCount] = Song(artistInstance.artistID, songsCount, _title, block.timestamp, _notes, songHash);
         hashToSong[songHash] = songIDtoSong[songsCount];
 
-        tokenContract.transferFrom(contractOwner, msg.sender, 500);
+        if (msg.sender != contractOwner)
+        {
+            tokenContract.transferFrom(contractOwner, msg.sender, 500);
+        }
     }
      
     function userBuySong(uint songID) external onlyUser payable {

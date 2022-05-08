@@ -12,12 +12,20 @@ Melomaniacs is a blockchain powered independent music buying and selling marketp
 truffle migrate --reset
 ```
 
+**To deploy on Ropsten**
+
+```bash
+npx truffle migrate --reset --compile-all --network inf_MeloManiac_ropsten
+```
+
 ### Install browserify to generate bundle.js
 ```bash
 npm install -g browserify
 cd src
 browserify app.js -o bundle.js
 ```
+
+You may need to run browserify command everytime you change the source of the app.js
 
 ### Start the webserver
 ```bash

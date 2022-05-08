@@ -3,9 +3,9 @@ App = {
     web3Provider: null,
     loading: false,
     contracts: {},
-    marketPlaceAddress: '0x7D914CE7f2489031F962bDDCD8927AB5d87eC6c1',
+    marketPlaceAddress: '0xdF39dff52cA9341cEf8CBA90A55f8AE91Ae3dd98',
     url: 'http://localhost:7545',
-    tokenAddress: '0xAa41237a53a9947a8fe0A2511A28bf6D44Aa738a',
+    tokenAddress: '0x7e7d3fF5fc9bAF4aA33e7305BA55f9Eb7088f293',
     buffer: '',
     blockNumber:'',
     transactionHash:'',
@@ -328,14 +328,12 @@ App = {
     purchaseSong: async (songID) => {
         const songDetails = await App.getSongDetail(songID);
         const cost = songDetails[3];
-        const extraAllowance = songDetails[3] * 2;
         const allowance = await App.getAllowance();
         if (allowance < cost.toNumber())
         {
+            const extraAllowance = songDetails[3] * 2;
             App.musicnotes.approve(App.marketPlaceAddress, extraAllowance, {from: App.account})
         }
-        console.log("Dale: Allowance: " + allowance);
-        console.log("Dale: Cost: " + cost.toNumber());
         await App.musicbook.userBuySong(songID, {from: App.account, value: cost}).then((e, result) => {
             $(".toast").toast("show");
             $(".toast-body").html("Purchase Successful!");

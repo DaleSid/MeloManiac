@@ -3,8 +3,9 @@ App = {
     web3Provider: null,
     loading: false,
     contracts: {},
-    address: '0x4a2feb0236Fb7Df8214Cd76ed3328ABAec6Dea9A',
+    marketPlaceAddress: '0x7D914CE7f2489031F962bDDCD8927AB5d87eC6c1',
     url: 'http://localhost:7545',
+    tokenAddress: '0xAa41237a53a9947a8fe0A2511A28bf6D44Aa738a',
     buffer: '',
     blockNumber:'',
     transactionHash:'',
@@ -37,9 +38,20 @@ App = {
     },
 
     loadContract: async () => {
+
+        // Token Contract
+        // Create a JavaScript version of the smart contract
+        const notesArtifact = await $.getJSON('MeloNotes.json')
+        App.contracts.musicnotes = TruffleContract(notesArtifact, App.tokenAddress)
+        App.contracts.musicnotes.setProvider(App.web3Provider)
+
+        // Hydrate the smart contract with values from the blockchain
+        App.musicnotes = await App.contracts.musicnotes.deployed()
+
+        // MarketPlace Contract
         // Create a JavaScript version of the smart contract
         const meloArtifact = await $.getJSON('MeloManiac.json')
-        App.contracts.musicbook = TruffleContract(meloArtifact, App.address)
+        App.contracts.musicbook = TruffleContract(meloArtifact, App.marketPlaceAddress)
         App.contracts.musicbook.setProvider(App.web3Provider)
     
         // Hydrate the smart contract with values from the blockchain
@@ -82,7 +94,7 @@ App = {
         console.log(App.network)
         $('#account').html(App.account)
         $('#network').html(App.network)
-        $('#account_balance').html(App.balance + " ETH")
+        $('#account_balance').html(App.balance + " Notes 🎵")
 
         $('#contract_address').html(App.contractAddress)
         $('#no_of_users').html(App.userCount)
@@ -116,9 +128,6 @@ App = {
         var userListings = await App.constructBuyerListings(App.songCount);
         $('#buyer_listings').html(userListings);
     
-        // Render Tasks
-        // await App.renderTasks()
-    
         // Update loading state
         App.setLoading(false)
     },
@@ -131,7 +140,7 @@ App = {
 
     loadBalance: async () => {
         var balance;
-        balance = web3.utils.fromWei(await web3.eth.getBalance(App.account), 'ether');
+        balance = App.musicnotes.balanceOf(App.account, {from: App.account});
         return balance;
     },
 
@@ -166,6 +175,7 @@ App = {
 
     registerUser: async () => {
         await App.musicbook.userRegister({from: App.account});
+        App.musicnotes.approve(App.marketPlaceAddress, App.balance, {from: App.account});
         await App.render();
     },
 
@@ -177,7 +187,8 @@ App = {
 
     registerArtist: async (nickName) => {
         console.log(nickName);
-        await App.musicbook.artistRegister(nickName, {from: App.account, value: web3.utils.toWei('0.05', 'ether')});
+        await App.musicbook.artistRegister(nickName, {from: App.account});
+        App.musicnotes.approve(App.marketPlaceAddress, App.balance, {from: App.account});
         await App.render();
     },
 
@@ -188,7 +199,7 @@ App = {
     },
 
     uploadSong: async (song, songFilePath, notes_cost) => {
-        const notes = web3.utils.toWei(notes_cost, 'ether');
+        const notes = notes_cost;
         var songHash = ''
         const songPath = songFilePath.split("\\");
         const titleWithExtension = songPath[songPath.length - 1].split(".");
@@ -300,7 +311,7 @@ App = {
             var releaseDate = new Date(values[4]*1000).toLocaleDateString("en-US", options)
             console.log('release Data is ' + releaseDate)
 
-            var buttonString = "<button type=\"button\" class=\"btn btn-primary purchase\" id=\"" + values[1] + "\">" + web3.utils.fromWei(values[3], "ether") + " ETH</button>";
+            var buttonString = "<button type=\"button\" class=\"btn btn-primary purchase\" id=\"" + values[1] + "\">" + values[3] + " Notes 🎵</button>";
 
             var tempHTMLString =    "<tr><td>" + values[1].toNumber() + "</td>" +
                                     "<td>" + values[2] + "</td>" +
@@ -316,9 +327,16 @@ App = {
 
     purchaseSong: async (songID) => {
         const songDetails = await App.getSongDetail(songID);
-        const notes = web3.utils.fromWei(songDetails[3], "ether");
-        console.log("Purchase Notes: " + notes);
-        await App.musicbook.userBuySong(songID, {from: App.account, value: web3.utils.toWei(notes, 'ether')}).then((e, result) => {
+        const cost = songDetails[3];
+        const extraAllowance = songDetails[3] * 2;
+        const allowance = await App.getAllowance();
+        if (allowance < cost.toNumber())
+        {
+            App.musicnotes.approve(App.marketPlaceAddress, extraAllowance, {from: App.account})
+        }
+        console.log("Dale: Allowance: " + allowance);
+        console.log("Dale: Cost: " + cost.toNumber());
+        await App.musicbook.userBuySong(songID, {from: App.account, value: cost}).then((e, result) => {
             $(".toast").toast("show");
             $(".toast-body").html("Purchase Successful!");
         }, (error) => {
@@ -331,6 +349,12 @@ App = {
             $(".toast-body").html(msgJSON.value.data.message);
         });
         await App.render();
+    },
+
+    getAllowance: async () => {
+        var value;
+        value = await App.musicnotes.allowance(App.account, App.marketPlaceAddress, {from: App.account});
+        return value;
     },
 
     getSongDetail: async (songID) => {

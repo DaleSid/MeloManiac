@@ -95,10 +95,15 @@ App = {
         $('#network').html(App.network)
         $('#account_balance').html(App.balance + " Notes 🎵")
 
-        $('#contract_address').html(App.contractAddress)
+        $('#contract_owner').html(App.contractAddress)
+        $('#marketplace_address').html(App.marketPlaceAddress)
+        $('#token_address').html(App.tokenAddress)
         $('#no_of_users').html(App.userCount)
         $('#no_of_artists').html(App.artistCount)
         $('#no_of_songs').html(App.songCount)
+        $('#current_user').html(App.account)
+        $('#current_network').html(App.network)
+        $('#token_balance').html(App.balance + " Notes 🎵")
 
         userDetails = await App.getUserDetail();
         App.userID = userDetails[0].toNumber();

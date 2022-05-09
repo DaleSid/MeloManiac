@@ -8,6 +8,6 @@ contract MeloNotes is ERC20 {
 
     constructor(string memory name, string memory symbol, uint256 initialSupply) ERC20(name, symbol) {
         owner = msg.sender;
-        _mint(msg.sender, initialSupply * decimals());
+        _mint(msg.sender, initialSupply * (10 ** decimals()));
     }
 }

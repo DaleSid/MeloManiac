@@ -93,7 +93,7 @@ App = {
         console.log(App.network)
         $('#account').html(App.account)
         $('#network').html(App.network)
-        $('#account_balance').html(App.balance + " Notes 🎵")
+        $('#account_balance').html(App.balance + " Notes (MNT) 🎵")
 
         $('#contract_owner').html(App.contractAddress)
         $('#marketplace_address').html(App.marketPlaceAddress)
@@ -103,7 +103,7 @@ App = {
         $('#no_of_songs').html(App.songCount)
         $('#current_user').html(App.account)
         $('#current_network').html(App.network)
-        $('#token_balance').html(App.balance + " Notes 🎵")
+        $('#token_balance').html(App.balance + " Notes (MNT) 🎵")
 
         userDetails = await App.getUserDetail();
         App.userID = userDetails[0].toNumber();
@@ -315,7 +315,7 @@ App = {
             var releaseDate = new Date(values[4]*1000).toLocaleDateString("en-US", options)
             console.log('release Data is ' + releaseDate)
 
-            var buttonString = "<button type=\"button\" class=\"btn btn-primary purchase\" id=\"" + values[1] + "\">" + values[3] + " Notes 🎵</button>";
+            var buttonString = "<button type=\"button\" class=\"btn btn-primary purchase\" id=\"" + values[1] + "\">" + values[3] + " Notes (MNT) 🎵</button>";
 
             var tempHTMLString =    "<tr><td>" + values[1].toNumber() + "</td>" +
                                     "<td>" + values[2] + "</td>" +

@@ -3,9 +3,9 @@ App = {
     web3Provider: null,
     loading: false,
     contracts: {},
-    marketPlaceAddress: '0x4ce219d395D93e3d20869DfD5c5125a2Fc9681C5',
+    marketPlaceAddress: '0x8BdF477CA0a937C82d130D4d2Bd019E574cfd8D6',
     url: 'https://ropsten.infura.io/v3/62cff11104f54085984676c0008ebce0',
-    tokenAddress: '0xDbeE936f22ae31B297B9302260B697cEC6d83D32',
+    tokenAddress: '0x395F487c8528A6E15CA7b483C946093a28d0c454',
     buffer: '',
     blockNumber:'',
     transactionHash:'',
@@ -217,7 +217,7 @@ App = {
             const buf = buffer.Buffer.from(reader.result) // Convert data into buffer
             App.ipfs.files.add(buf, (err, result) => { // Upload buffer to IPFS
                 if(err) {
-                    console.error(err)
+                    console.error("IPFS Add error: " + err)
                     return
                 }
                 console.log(typeof result[0].hash)
